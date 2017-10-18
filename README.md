@@ -80,7 +80,7 @@ Options for 'bdist_wotmod' command:
 ...
 ```
 
-### Examples
+### Usage
 
 For packaging a World of Tanks mod into a wotmod package, use command:
 
@@ -110,6 +110,10 @@ libraries will not even work if they are not on PYTHONPATH).
 
 You may also want to set package's author-id with `--author-id=<name>` to a more
 descriptive value.
+
+### Examples
+
+See helloworld example mod in `examples` subdirectory.
 
 ## Running tests
 
