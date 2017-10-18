@@ -23,6 +23,11 @@ There are certain limitations though:
 Some of these limitations exist because I didn't need them and was too lazy to
 add them. If you need more functionality, let me know.
 
+Implementation of the command is based on packages specification from:
+  https://koreanrandom.com/forum/topic/36987-/
+
+The specification is also available in `docs` subdirectory.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and installed to your
