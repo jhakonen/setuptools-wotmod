@@ -3,19 +3,19 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='wotdisttools',
+    name='setuptools-wotmod',
     version='0.1',
     packages=find_packages(),
-    description='distutils/setuptools integration for creating World of Tanks mods',
+    description='setuptools integration for creating World of Tanks mods',
     long_description=open('README.md').read(),
     author='jhakonen',
-    url='https://github.com/jhakonen/wot-teamspeak-mod/',
+    url='https://github.com/jhakonen/setuptools-wotmod/',
     license='MIT License',
     setup_requires=['pytest-runner'],
     tests_require=['pytest'],
     entry_points={
         "distutils.commands": [
-            "bdist_wotmod = wotdisttools.bdist_wotmod:bdist_wotmod",
+            "bdist_wotmod = setuptools_wotmod.bdist_wotmod:bdist_wotmod",
         ],
     },
 )

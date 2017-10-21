@@ -1,4 +1,4 @@
-# wotdisttools
+# setuptools-wotmod
 
 Provides Python setuptools command `bdist_wotmod` to package any setuptools
 based project into a World of Tanks’ wotmod package.
@@ -49,8 +49,8 @@ python -m pip install -U pip setuptools
 Clone this repository first and then install it using setuptools script:
 
 ```powershell
-git clone wotdisttools https://github.com/jhakonen/wotdisttools.git
-cd wotdisttools
+git clone setuptools-wotmod https://github.com/jhakonen/setuptools-wotmod.git
+cd setuptools-wotmod
 python setup.py install
 ```
 

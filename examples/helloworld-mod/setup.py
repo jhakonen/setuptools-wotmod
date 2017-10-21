@@ -32,12 +32,11 @@ setup(
     # Include also name.txt data file in the wotmod package. The file will end
     # up by default to res/mods/<author_id>.<mod_id> within the package.
     data_files = ['data/name.txt'],
-    # These requires will install wotdisttools on first execution if it not
+    # These requires will install setuptools-wotmod on first execution if it not
     # yet installed
-    setup_requires = ['wotdisttools'],
-    install_requires = ['wotdisttools'],
-    # Required as wotdisttools is not yet in PyPI
+    setup_requires = ['setuptools-wotmod'],
+    # Required as setuptools-wotmod is not yet in PyPI
     dependency_links = [
-        'https://github.com/jhakonen/wotdisttools/tarball/master#egg=wotdisttools'
+        'https://github.com/jhakonen/setuptools-wotmod/tarball/master#egg=setuptools-wotmod'
     ],
 )

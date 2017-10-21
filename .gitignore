@@ -4,5 +4,5 @@
 .cache
 .eggs
 __pycache__
-wotdisttools.egg-info
+setuptools_wotmod.egg-info
 *.pyc

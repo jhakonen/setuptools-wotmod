@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 from setuptools import Distribution
 from distutils.tests import support
 
-from wotdisttools.bdist_wotmod import bdist_wotmod
+from setuptools_wotmod.bdist_wotmod import bdist_wotmod
 
 class BuildWotmodTestCase(support.TempdirManager, unittest.TestCase):
 
