@@ -23,11 +23,11 @@ This folder contains two example scripts, one for Windows/Powershell and another
 for Linux/Bash, both do the same thing, which is to download pydash (see:
 https://pypi.python.org/pypi/pydash/4.2.1) and build a wotmod package out of it.
 
-After execution the script you can copy the built wotmod package to
+After executing the script you can copy the built wotmod package to
 `mods\<version>` folder in WoT's root folder.
 
-With debugging tools (e.g. https://github.com/juho-p/wot-debugserver) you can
-enter game's Python interpreter and import the command:
+Then, with debugging tools (e.g. https://github.com/juho-p/wot-debugserver) you
+can enter game's Python interpreter and import the package:
 
 ```python
 >>> import pydash as _
