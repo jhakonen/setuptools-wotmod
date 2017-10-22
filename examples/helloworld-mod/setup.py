@@ -4,9 +4,6 @@ package for World of Tanks game.
 """
 
 from setuptools import setup, find_packages
-import os
-
-script_dir = os.path.dirname(__file__)
 
 setup(
     # Name is also mod-id of the wotmod package
@@ -17,12 +14,10 @@ setup(
     # Description will also be available in a auto generated meta.xml file
     # within the wotmod archive.
     description = 'Mod for embracing the world',
-    long_description = open(os.path.join(script_dir, 'README.txt')).read(),
     # Author is also author-id of the wotmod archive, if not defined,
     # maintainer's name is is used
     author = 'johndoe',
     license = 'MIT License',
-    url = 'http://example.com/',
     # Tell setuptools to build and include 'helloworld' package and the
     # individual mod_helloworld module in the final distribution of .wotmod.
     # These files will end up by default to res/scripts/client/gui/mods within
@@ -34,7 +29,7 @@ setup(
     data_files = [
         ('data', ['data/name.txt'])
     ],
-    # These requires will install setuptools-wotmod on first execution if it not
+    # This require will install setuptools-wotmod on first execution if it not
     # yet installed
     setup_requires = ['setuptools-wotmod'],
     # Required as setuptools-wotmod is not yet in PyPI
