@@ -16,7 +16,7 @@ def init():
     Mod initialization function.
     Called by World of Tanks when the game starts up.
     """
-    name = resources.read_file('mods/johndoe.helloworld/name.txt')
+    name = resources.read_file('mods/johndoe.helloworld/data/name.txt')
     # Print statements end up to python.log in game's root directory
     print 'Hello %s!' % name
 
@@ -25,5 +25,5 @@ def fini():
     Mod deinitialization function.
     Called by World of Tanks when the game shuts down.
     """
-    name = resources.read_file('mods/johndoe.helloworld/name.txt')
+    name = resources.read_file('mods/johndoe.helloworld/data/name.txt')
     print 'Bye bye %s!' % name

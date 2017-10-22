@@ -31,7 +31,9 @@ setup(
     py_modules = ['mod_helloworld'],
     # Include also name.txt data file in the wotmod package. The file will end
     # up by default to res/mods/<author_id>.<mod_id> within the package.
-    data_files = ['data/name.txt'],
+    data_files = [
+        ('data', ['data/name.txt'])
+    ],
     # These requires will install setuptools-wotmod on first execution if it not
     # yet installed
     setup_requires = ['setuptools-wotmod'],
