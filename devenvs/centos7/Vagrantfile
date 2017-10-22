@@ -1,0 +1,64 @@
+# This file provides Vagrant environment for testing setuptools-wotmod in Linux.
+# Uses Centos 7 as a base image.
+
+# USAGE:
+# Set environment variable MOD_INSTALL_PATH to point to WoT's mods\<version>
+# folder, e.g. in powershell:
+#     $env:MOD_INSTALL_PATH="C:\Games\World_of_Tanks\mods\0.9.20.1"
+#
+# Then start vagrant machine:
+#     vagrant up
+#
+# After machine is up go to shell with command:
+#     vagrant ssh
+#
+# Game's mods install dir is mounted to /mod_install.
+#
+
+# sudo yum install epel-release -y
+# sudo yum install python2-pip -y
+# sudo pip install --upgrade pip
+
+MOD_INSTALL_PATH = ENV["MOD_INSTALL_PATH"]
+
+def install_plugins(plugins)
+  not_installed = []
+  plugins.each do |plugin|
+    unless Vagrant.has_plugin?(plugin)
+      not_installed << plugin
+    end
+  end
+
+  unless not_installed.empty?
+    puts "The following required plugins must be installed:"
+    puts "'#{not_installed.join("', '")}'"
+    print "Install? [y]/n: "
+    unless STDIN.gets.chomp == "n"
+      not_installed.each { |plugin| install_plugin(plugin) }
+    else
+      exit
+    end
+    $? ? continue : ( raise 'Plugin installation failed, see errors above.' )
+  end
+end
+
+def install_plugin(plugin)
+  system("vagrant plugin install #{plugin}")
+end
+
+# If plugins successfully installed, restart vagrant to detect changes.
+def continue
+  exec("vagrant #{ARGV[0]}")
+end
+
+required_plugins = ["vagrant-vbguest"]
+install_plugins(required_plugins)
+
+Vagrant.configure("2") do |config|
+  config.vm.define :devenv
+  config.vm.box = "centos/7"
+  config.vm.synced_folder MOD_INSTALL_PATH, "/mod_install"
+  config.vm.synced_folder "../../", "/vagrant", type: "virtualbox"
+  config.vbguest.auto_update = true
+  config.vbguest.auto_reboot = true
+end
