@@ -21,8 +21,8 @@ Within the example's directory execute command:
 python setup.py bdist_wotmod
 ```
 
-This will produce 'johndoe.helloworld_01.00.wotmod' file to 'dist' subdirectory.
-Copy the created wotmod file to '$ROOT\mods\$VERSION', where:
+This will produce `johndoe.helloworld_01.00.wotmod` file to `dist` subdirectory.
+Copy the created wotmod file to `$ROOT\mods\$VERSION`, where:
  - $ROOT is WoT's root folder e.g. C:\Games\World_of_Tanks, and
  - $VERSION is game's current version
 
@@ -33,7 +33,7 @@ default dist directory:
     python setup.py bdist_wotmod --dist-dir=$ROOT\mods\$VERSION
 ```
 
-Now start following python.log to see what the mods prints. In Powershell:
+Now start following `python.log` to see what the mods prints. In Powershell:
 
 ```powershell
     Get-Content $ROOT\python.log -Tail 3 -Wait
