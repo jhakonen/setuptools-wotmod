@@ -2,15 +2,7 @@
 
 # This script fetches pydash 4.2.1 from PyPI and builds and packages it into a
 # wotmod package. After script execution you should have package with name
-# com.github.dgilland.pydash_04.02.01.wotmod. This you can insert to game's
-# mods\<version> folder and then in game's interpreter simply do:
-#
-#   import pydash
-#
-
-# First, you need to install bdist_wotmod command, cd to this project's
-# root folder and give command:
-#   python setup.py install
+# com.github.dgilland.pydash_04.02.01.wotmod.
 
 SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 

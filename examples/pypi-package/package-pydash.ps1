@@ -1,17 +1,9 @@
 # This script fetches pydash 4.2.1 from PyPI and builds and packages it into a
-# wotmod package. After script execution you should have package with name
-# com.github.dgilland.pydash_04.02.01.wotmod. This you can insert to game's
-# mods\<version> folder and then in game's interpreter simply do:
-#
-#   import pydash
-#
+# wotmod package. After script execution you should have a package with name
+# com.github.dgilland.pydash_04.02.01.wotmod.
 
 # Since Windows 10 doesn't come tools to extract tar.gz archive, you will need
-# to install 7-Zip first (see: http://www.7-zip.org/)
-
-# In addition, you need to install bdist_wotmod command, cd to this project's
-# root folder and give command:
-#   python setup.py install
+# to install 7-Zip first (see: http://www.7-zip.org/).
 
 # Adjust this path if you installed 7-Zip somewhere else
 $SEVENZIP_PATH="C:\Program Files\7-Zip"
