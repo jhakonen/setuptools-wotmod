@@ -19,8 +19,9 @@ python setup.py install
 
 ## Installation
 
-This folder contains example script, which downloada pydash (see:
-https://pypi.python.org/pypi/pydash/4.2.1) and builda a wotmod package out of it.
+This folder contains two example scripts, one for Windows/Powershell and another
+for Linux/Bash, both do the same thing, which is to download pydash (see:
+https://pypi.python.org/pypi/pydash/4.2.1) and build a wotmod package out of it.
 
 After execution the script you can copy the built wotmod package to
 `mods\<version>` folder in WoT's root folder.

@@ -35,10 +35,13 @@ local machine.
 
 ### Prerequisites
 
+This tool and the included examples are cross-platform, I've tested that they
+work in Windows and Linux.
+
 You will need Python 2.7 to compile py files. Using any other version might
 produce pyc files which are incompatible with World of Tanks’ embedded Python
-interpreter. Setuptools and Pip are also required, but they should come included
-with Python. Just upgrade them first to latest versions:
+interpreter. Setuptools and Pip are also required, but in Windows case they
+should come included with Python. Just upgrade them first to latest versions:
 
 ```powershell
 python -m pip install -U pip setuptools
@@ -46,7 +49,7 @@ python -m pip install -U pip setuptools
 
 ### Installing
 
-Clone this repository first and then install it using setuptools script:
+Clone this repository and then install it using setuptools script:
 
 ```powershell
 git clone setuptools-wotmod https://github.com/jhakonen/setuptools-wotmod.git
@@ -113,7 +116,10 @@ descriptive value.
 
 ### Examples
 
-See helloworld example mod in `examples` subdirectory.
+There are two examples:
+
+* helloworld mod in [examples/helloworld-mod](examples/helloworld-mod)
+* 3rd party PyPI packaging example in [examples/pypi-package](examples/pypi-package)
 
 ## Running tests
 
