@@ -36,3 +36,7 @@ Now start following python.log to see what the mods prints. In Powershell::
 Start the game, and after a while shut it down, and you should see HelloWorld
 embracing the world :)
 
+License
+-------
+This example is licensed under WTFPL license, for more info, see:
+  http://www.wtfpl.net/about/

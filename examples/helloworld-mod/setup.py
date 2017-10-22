@@ -17,7 +17,7 @@ setup(
     # Author is also author-id of the wotmod archive, if not defined,
     # maintainer's name is is used
     author = 'johndoe',
-    license = 'MIT License',
+    license = 'WTFPL License',
     # Tell setuptools to build and include 'helloworld' package and the
     # individual mod_helloworld module in the final distribution of .wotmod.
     # These files will end up by default to res/scripts/client/gui/mods within
