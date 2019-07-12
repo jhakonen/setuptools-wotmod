@@ -188,11 +188,11 @@ class bdist_wotmod(Command):
 
         log.info("creating '%s' and adding '%s' to it", zip_filename, self.bdist_dir)
 
-        archive_root = self.to_posix_separators(self.bdist_dir)
+        archive_root = to_posix_separators(self.bdist_dir)
 
         with zipfile.ZipFile(zip_filename, 'w') as zip:
             for dirpath, dirnames, filenames in os.walk(archive_root):
-                dirpath = self.to_posix_separators(dirpath)
+                dirpath = to_posix_separators(dirpath)
 
                 # Build relative path from bdist_dir forward
                 archive_dirpath = dirpath.replace(posixpath.commonprefix(
@@ -214,9 +214,6 @@ class bdist_wotmod(Command):
 
         return zip_filename
 
-    def to_posix_separators(self, win_path):
-        return win_path.replace('\\', '/') if os.sep == '\\' else win_path
-
     def get_output_file_path(self):
         """
         Returns path to the wotmod file. This method can be called either
@@ -227,3 +224,6 @@ class bdist_wotmod(Command):
         zip_filename = "%s.%s_%s.wotmod" % (
             self.author_id, self.mod_id, self.mod_version)
         return os.path.abspath(os.path.join(self.dist_dir, zip_filename))
+
+def to_posix_separators(win_path):
+    return win_path.replace('\\', '/') if os.sep == '\\' else win_path
