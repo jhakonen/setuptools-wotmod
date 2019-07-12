@@ -8,10 +8,12 @@ from distutils import log
 from distutils.dir_util import mkpath, remove_tree
 from distutils.file_util import copy_file
 from setuptools import Command
+from setuptools.extern import packaging
 
 import os
 import posixpath
 import re
+import warnings
 import zipfile
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
@@ -75,7 +77,30 @@ class bdist_wotmod(Command):
         # Resolve mod_version and pad each version fragment with zeros
         if self.mod_version is None:
             self.mod_version = self.distribution.get_version()
-        self.mod_version = '.'.join(part.rjust(self.version_padding, '0') for part in self.mod_version.split('.'))
+        # Try to pick only major, minor and patch parts from the input version.
+        # Using any of the other parts (e.g. rc1, -alpha, -beta) might lead to
+        # issues when author leaves them out at time of creating a release
+        # version. As WoT determines the wotmod file to load using strcmp() it
+        # is not safe to add optional parts at the end of the version string as
+        # those prerelease wotmod packages would be loaded instead of the
+        # release version.
+        version = self.distribution.get_version()
+        version_obj = packaging.version.Version(version)
+        release_parts = version_obj._version.release
+        release_str = '.'.join(str(x) for x in release_parts)
+        if release_str != version:
+            warnings.warn(
+                'bdist_wotmod: Using only release part %s of the version %s to form '
+                'the wotmod package version' % (repr(release_str), repr(version))
+            )
+        parts = release_parts
+        if len(parts) == 1:
+            warnings.warn('bdist_wotmod: Minor part of the version is missing, setting it to zero')            
+            parts += (0,)
+        if len(parts) == 2:
+            warnings.warn('bdist_wotmod: Patch part of the version is missing, setting it to zero')            
+            parts += (0,)
+        self.mod_version =  '.'.join(str(part).rjust(self.version_padding, '0') for part in parts)
         # Resolve mod_description
         if self.mod_description is None:
             self.mod_description = self.distribution.get_description()
@@ -158,9 +183,7 @@ class bdist_wotmod(Command):
         Inserts files from bdist-dir to .wotmod package and stores it to dist-dir.
         :return: path to wotmod package file
         """
-        zip_filename = "%s.%s_%s.wotmod" % (
-            self.author_id, self.mod_id, self.mod_version)
-        zip_filename = os.path.abspath(os.path.join(self.dist_dir, zip_filename))
+        zip_filename = self.get_output_file_path()
         mkpath(os.path.dirname(zip_filename))
 
         log.info("creating '%s' and adding '%s' to it", zip_filename, self.bdist_dir)
@@ -193,3 +216,14 @@ class bdist_wotmod(Command):
 
     def to_posix_separators(self, win_path):
         return win_path.replace('\\', '/') if os.sep == '\\' else win_path
+
+    def get_output_file_path(self):
+        """
+        Returns path to the wotmod file. This method can be called either
+        before or after running the command. When executed before the returned
+        file path hasn't been created yet.
+        :return: path to the wotmod package file
+        """
+        zip_filename = "%s.%s_%s.wotmod" % (
+            self.author_id, self.mod_id, self.mod_version)
+        return os.path.abspath(os.path.join(self.dist_dir, zip_filename))
