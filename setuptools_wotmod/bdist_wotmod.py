@@ -95,10 +95,10 @@ class bdist_wotmod(Command):
             )
         parts = release_parts
         if len(parts) == 1:
-            warnings.warn('bdist_wotmod: Minor part of the version is missing, setting it to zero')            
+            warnings.warn('bdist_wotmod: Minor part of the version is missing, setting it to zero')
             parts += (0,)
         if len(parts) == 2:
-            warnings.warn('bdist_wotmod: Patch part of the version is missing, setting it to zero')            
+            warnings.warn('bdist_wotmod: Patch part of the version is missing, setting it to zero')
             parts += (0,)
         self.mod_version =  '.'.join(str(part).rjust(self.version_padding, '0') for part in parts)
         # Resolve mod_description
