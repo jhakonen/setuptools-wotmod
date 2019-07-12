@@ -114,6 +114,7 @@ class bdist_wotmod(Command):
         self.set_undefined_options('bdist', ('dist_dir', 'dist_dir'))
 
     def run(self):
+        self.distribution.get_command_obj('install_data').warn_dir = 0
         self.build_files()
         self.install_files()
         self.create_metaxml()

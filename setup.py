@@ -12,7 +12,7 @@ setup(
     url='https://github.com/jhakonen/setuptools-wotmod/',
     license='MIT License',
     setup_requires=['pytest-runner'],
-    tests_require=['pytest<5'],
+    tests_require=['pytest<5', 'mock'],
     entry_points={
         "distutils.commands": [
             "bdist_wotmod = setuptools_wotmod.bdist_wotmod:bdist_wotmod",

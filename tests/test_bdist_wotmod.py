@@ -8,6 +8,7 @@ import os
 import zipfile
 import xml.etree.ElementTree as ET
 
+import mock
 from setuptools import Distribution
 from distutils.tests import support
 from nose.tools import assert_equal
@@ -56,7 +57,9 @@ class BuildWotmodTestCase(support.TempdirManager, unittest.TestCase):
         self.write_file((self.pkg_dir, 'README'), 'README contents')
         self.write_file((self.pkg_dir, 'LICENSE'), 'LICENSE contents')
         self.write_file((self.pkg_dir, 'CHANGES'), 'CHANGES contents')
-        dist = create_distribution()
+        self.write_file((self.pkg_dir, 'datafile'), 'datafile contents')
+        dist = create_distribution(data_files = ['datafile'])
+        dist.get_command_obj('install_data').warn = mock.Mock()
         cmd = bdist_wotmod(dist)
         cmd.install_lib = 'res/scripts/common'
         cmd.author_id = 'com.github.jhakonen'
@@ -75,11 +78,13 @@ class BuildWotmodTestCase(support.TempdirManager, unittest.TestCase):
         self.assertFileInZip(wotmod_path, 'meta.xml')
         self.assertFileInZip(wotmod_path, 'res/scripts/common/foo.py', '#')
         self.assertFileInZip(wotmod_path, 'res/scripts/common/foo.pyc')
+        self.assertFileInZip(wotmod_path, 'res/mods/com.github.jhakonen.foo/datafile', 'datafile contents')
         contents = get_file_in_zip_contents(wotmod_path, 'meta.xml')
         self.assertXmlXPath(contents, './id', 'com.github.jhakonen.foo')
         self.assertXmlXPath(contents, './version', '00.01.00')
         self.assertXmlXPath(contents, './name', 'foo')
         self.assertXmlXPath(contents, './description', 'has cool stuff')
+        dist.get_command_obj('install_data').warn.assert_not_called()
 
 @pytest.mark.filterwarnings("ignore:bdist_wotmod")
 @pytest.mark.filterwarnings("ignore:Normalizing .+ to .+")
