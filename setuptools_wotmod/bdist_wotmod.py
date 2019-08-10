@@ -7,16 +7,21 @@ wotmod package of them.
 from distutils import log
 from distutils.dir_util import mkpath, remove_tree
 from distutils.file_util import copy_file
+import distutils.util
 from setuptools import Command
 from setuptools.extern import packaging
 
+from contextlib import contextmanager
+from functools import partial
 import os
 import posixpath
 import re
+import struct
+from tempfile import NamedTemporaryFile
 import warnings
-import zipfile
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+import zipfile
 
 class bdist_wotmod(Command):
 
@@ -43,6 +48,9 @@ class bdist_wotmod(Command):
          "installation directory for module distributions [default: 'res/scripts/client/gui/mods']"),
         ('install-data=', None,
          "installation directory for data files [default: 'res/mods/<author_id>.<mod_id>']"),
+        ('python27=', None,
+         "Path to Python 2.7 executable (required when command is executed with non-2.7 Python interpreter) "
+         "[default: BDIST_WOTMOD_PYTHON27 environment variable]"),
     ]
 
     def initialize_options(self):
@@ -55,6 +63,7 @@ class bdist_wotmod(Command):
         self.version_padding = None
         self.install_lib     = None
         self.install_data    = None
+        self.python27        = None
 
     def finalize_options(self):
         # Resolve install directory
@@ -111,11 +120,15 @@ class bdist_wotmod(Command):
         # Resolve where data files should be placed in
         if self.install_data is None:
             self.install_data = 'res/mods/%s.%s' % (self.author_id, self.mod_id)
+        if self.python27 is None and 'BDIST_WOTMOD_PYTHON27' in os.environ:
+            self.python27 = os.environ['BDIST_WOTMOD_PYTHON27']
+
         self.set_undefined_options('bdist', ('dist_dir', 'dist_dir'))
 
     def run(self):
         self.distribution.get_command_obj('install_data').warn_dir = 0
         self.build_files()
+        self.verify_pyc_files()
         self.install_files()
         self.create_metaxml()
         self.include_other_documents()
@@ -130,7 +143,35 @@ class bdist_wotmod(Command):
         """
         Compiles .py files.
         """
-        self.run_command('build')
+        # By default build_py just copies already built pyc files from
+        # a cache. Set compile=1 to force recreation of those files.
+        build = self.reinitialize_command('build_py', reinit_subcommands=1)
+        build.compile=1
+
+        if self.python27:
+            # Monkey patch byte_compile() with custom function that delegates
+            # the byte compilation to a separate Python 2.7 interpreter.
+            # This is required when setuptools-wotmod is executed with Python
+            # 3.x. The pyc files must still be Python 2.7 based for them to
+            # succesfully load into World of Tanks's embedded Python interpreter.
+            with patch_func(distutils.util, 'byte_compile', partial(python27_byte_compile, self.python27)):
+                self.run_command('build')
+        else:
+            self.run_command('build')
+
+    def verify_pyc_files(self):
+        """
+        Ensures that compiled pyc files are loadable by Python 2.7.
+        """
+        for root, dirs, files in os.walk(self.get_finalized_command('build_py').build_lib):
+            for filename in files:
+                if os.path.splitext(filename)[1] == '.pyc':
+                    filepath = os.path.join(root, filename)
+                    assert is_python27_pyc_file(filepath), \
+                        'File "%s" is not valid Python 2.7 byte-compiled ' \
+                        'file, ensure that command line argument --python27 ' \
+                        'or env variable BDIST_WOTMOD_PYTHON27 points to ' \
+                        'Python 2.7 interpreter' % filepath
 
     def install_files(self):
         """
@@ -141,6 +182,10 @@ class bdist_wotmod(Command):
         install.install_lib = self.install_lib
         install.install_data = self.install_data
         install.warn_dir = 0
+        # Compiling is already done in build-step, no need to recompile. This
+        # doesn't even work with Python 3 if source files contain Python 2
+        # spesific syntax
+        install.compile = 0
         # No need for egg metadata and executable scripts in wotmod package
         install.sub_commands = [cmd for cmd in install.sub_commands if cmd[0] != 'install_egg_info']
         install.sub_commands = [cmd for cmd in install.sub_commands if cmd[0] != 'install_scripts']
@@ -153,7 +198,7 @@ class bdist_wotmod(Command):
         """
         metaxml_path = os.path.join(self.bdist_dir, 'meta.xml')
         log.info("Writing %s", metaxml_path)
-        with open(metaxml_path, 'w') as metaxml_file:
+        with open(metaxml_path, 'wb') as metaxml_file:
             root = ET.Element('root')
             id = ET.SubElement(root, 'id')
             id.text = '%s.%s' % (self.author_id, self.mod_id)
@@ -228,3 +273,47 @@ class bdist_wotmod(Command):
 
 def to_posix_separators(win_path):
     return win_path.replace('\\', '/') if os.sep == '\\' else win_path
+
+@contextmanager
+def patch_func(module, function_name, replacement):
+    """
+    Helper function that patches a function in a module with a replacement
+    function. The returned value must be used in with-statement where the
+    patching will happen upon entering the inner block and the patching is
+    undone when execution leaves the block.
+
+    :param module: target module to modify
+    :param function_name: target function name to modify
+    :param replacement: replacement function
+    :return: context manager
+    """
+    original = getattr(module, function_name)
+    setattr(module, function_name, replacement)
+    try:
+        yield
+    finally:
+        setattr(module, function_name, original)
+
+def python27_byte_compile(python27, files, optimize, force, prefix, dry_run):
+    """
+    Replacement function for distutils.util.byte_compile() which delegates call
+    to external Python interpreter, given as the first argument.
+    """
+    with NamedTemporaryFile(suffix='.py', delete=False) as script_file:
+        script_file.write('\n'.join([
+            'from distutils.util import byte_compile',
+            'files = [',
+            ',\n'.join(map(repr, files)),
+            ']',
+            'byte_compile(files, optimize=%r, force=%r, prefix=%r)' % (optimize, force, prefix)
+        ]).encode('utf-8'))
+    try:
+        distutils.util.spawn([python27, script_file.name], dry_run=dry_run)
+    finally:
+        distutils.util.execute(os.remove, (script_file.name,), "removing %s" % script_file.name, dry_run=dry_run)
+
+def is_python27_pyc_file(filepath):
+    with open(filepath, 'rb') as pyc_file:
+        magic_number = struct.unpack('BBBB', pyc_file.read(4))
+        return magic_number == (0x03, 0xf3, 0x0d, 0x0a)
+    return False

@@ -28,6 +28,9 @@ Implementation of the command is based on packages specification from:
 
 The specification is also available in `docs` subdirectory.
 
+This tool supports Python 2.7 and 3.5 (or newer). Earlier 3.x versions might
+work, but are not actively tested.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and installed to your
@@ -36,22 +39,35 @@ local machine.
 ### Prerequisites
 
 This tool and the included examples are cross-platform, I've tested that they
-work in Windows and Linux.
+work in Linux and Windows.
 
 You will need Python 2.7 to compile py files. Using any other version might
 produce pyc files which are incompatible with World of Tanks’ embedded Python
 interpreter. Setuptools and Pip are also required, but in Windows case they
 should come included with Python. Just upgrade them first to latest versions:
 
-```powershell
+```bash
 python -m pip install -U pip setuptools
+```
+
+When using Python 3.x you will need to provide path also to Python 2.7
+interpreter when running this tool, e.g.:
+
+```bash
+python setup.py bdist_wotmod --python27=/usr/bin/python2
+```
+
+Or using an environment variable:
+
+```bash
+BDIST_WOTMOD_PYTHON27=/usr/bin/python2 python setup.py bdist_wotmod
 ```
 
 ### Installing
 
 Clone this repository and then install it using setuptools script:
 
-```powershell
+```bash
 git clone setuptools-wotmod https://github.com/jhakonen/setuptools-wotmod.git
 cd setuptools-wotmod
 python setup.py install
@@ -61,7 +77,7 @@ Once installed, any Python project which has setuptools based setup.py will have
 a new command `bdist_wotmod` which you can use to create a wotmod package out of
 the project.
 
-```powershell
+```bash
 python setup.py bdist_wotmod --help
 ```
 ```
@@ -80,6 +96,9 @@ Options for 'bdist_wotmod' command:
                      'res/scripts/client/gui/mods']
   --install-data     installation directory for data files [default:
                      'res/mods/<author_id>.<mod_id>']
+  --python27         Path to Python 2.7 executable (required when command is
+                     executed with non-2.7 Python interpreter) [default:
+                     BDIST_WOTMOD_PYTHON27 environment variable]
 ...
 ```
 
@@ -87,7 +106,7 @@ Options for 'bdist_wotmod' command:
 
 For packaging a World of Tanks mod into a wotmod package, use command:
 
-```powershell
+```bash
 python setup.py bdist_wotmod
 ```
 
@@ -98,12 +117,12 @@ wotmod package. Any data files will end up to wotmod's
 
 For packaging non-mod 3rd party libraries, use commands:
 
-```powershell
+```bash
 pip download <package name> --no-binary :all:
 ```
 
 Extract downloaded file somewhere, cd to its directory and give command:
-```powershell
+```bash
 python setup.py bdist_wotmod --install-lib=res/scripts/common
 ```
 
@@ -127,6 +146,13 @@ Unit tests are executed with command:
 
 ```bash
 python setup.py test
+```
+
+Running tests against supported Python versions using Tox:
+
+```bash
+pip install tox
+BDIST_WOTMOD_PYTHON27=/usr/bin/python2 tox
 ```
 
 ## License

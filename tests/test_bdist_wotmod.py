@@ -10,15 +10,16 @@ import xml.etree.ElementTree as ET
 
 import mock
 from setuptools import Distribution
-from distutils.tests import support
 from nose.tools import assert_equal
 import pytest
+
+from utils import TempdirManager, get_file_in_zip_contents
 
 from setuptools_wotmod.bdist_wotmod import bdist_wotmod
 
 @pytest.mark.filterwarnings("ignore:bdist_wotmod")
 @pytest.mark.filterwarnings("ignore:Normalizing .+ to .+")
-class BuildWotmodTestCase(support.TempdirManager, unittest.TestCase):
+class BuildWotmodTestCase(TempdirManager, unittest.TestCase):
 
     def setUp(self):
         super(BuildWotmodTestCase, self).setUp()
@@ -27,6 +28,15 @@ class BuildWotmodTestCase(support.TempdirManager, unittest.TestCase):
         self.pkg_dir = self.mkdtemp()
         os.chdir(self.pkg_dir)
         sys.argv = ['setup.py']
+        # Setup test project
+        self.write_file((self.pkg_dir, 'setup.py'), '#')
+        self.write_file((self.pkg_dir, 'foo.py'), '#')
+        self.write_file((self.pkg_dir, 'README'), 'README contents')
+        self.write_file((self.pkg_dir, 'LICENSE'), 'LICENSE contents')
+        self.write_file((self.pkg_dir, 'CHANGES'), 'CHANGES contents')
+        self.write_file((self.pkg_dir, 'datafile'), 'datafile contents')
+        self.dist = create_distribution(data_files = ['datafile'])
+        self.dist.get_command_obj('install_data').warn = mock.Mock()
 
     def tearDown(self):
         os.chdir(self.old_location)
@@ -52,15 +62,7 @@ class BuildWotmodTestCase(support.TempdirManager, unittest.TestCase):
 
     def test_common_package_creation(self):
         # Setup test project
-        self.write_file((self.pkg_dir, 'setup.py'), '#')
-        self.write_file((self.pkg_dir, 'foo.py'), '#')
-        self.write_file((self.pkg_dir, 'README'), 'README contents')
-        self.write_file((self.pkg_dir, 'LICENSE'), 'LICENSE contents')
-        self.write_file((self.pkg_dir, 'CHANGES'), 'CHANGES contents')
-        self.write_file((self.pkg_dir, 'datafile'), 'datafile contents')
-        dist = create_distribution(data_files = ['datafile'])
-        dist.get_command_obj('install_data').warn = mock.Mock()
-        cmd = bdist_wotmod(dist)
+        cmd = bdist_wotmod(self.dist)
         cmd.install_lib = 'res/scripts/common'
         cmd.author_id = 'com.github.jhakonen'
         # Execute command to produce wotmod file
@@ -72,23 +74,36 @@ class BuildWotmodTestCase(support.TempdirManager, unittest.TestCase):
         self.assertDirInZip(wotmod_path, 'res/')
         self.assertDirInZip(wotmod_path, 'res/scripts/')
         self.assertDirInZip(wotmod_path, 'res/scripts/common/')
-        self.assertFileInZip(wotmod_path, 'README', 'README contents')
-        self.assertFileInZip(wotmod_path, 'LICENSE', 'LICENSE contents')
-        self.assertFileInZip(wotmod_path, 'CHANGES', 'CHANGES contents')
+        self.assertFileInZip(wotmod_path, 'README', b'README contents')
+        self.assertFileInZip(wotmod_path, 'LICENSE', b'LICENSE contents')
+        self.assertFileInZip(wotmod_path, 'CHANGES', b'CHANGES contents')
         self.assertFileInZip(wotmod_path, 'meta.xml')
-        self.assertFileInZip(wotmod_path, 'res/scripts/common/foo.py', '#')
+        self.assertFileInZip(wotmod_path, 'res/scripts/common/foo.py', b'#')
         self.assertFileInZip(wotmod_path, 'res/scripts/common/foo.pyc')
-        self.assertFileInZip(wotmod_path, 'res/mods/com.github.jhakonen.foo/datafile', 'datafile contents')
+        self.assertFileInZip(wotmod_path, 'res/mods/com.github.jhakonen.foo/datafile', b'datafile contents')
         contents = get_file_in_zip_contents(wotmod_path, 'meta.xml')
         self.assertXmlXPath(contents, './id', 'com.github.jhakonen.foo')
         self.assertXmlXPath(contents, './version', '00.01.00')
         self.assertXmlXPath(contents, './name', 'foo')
         self.assertXmlXPath(contents, './description', 'has cool stuff')
-        dist.get_command_obj('install_data').warn.assert_not_called()
+        self.dist.get_command_obj('install_data').warn.assert_not_called()
+
+    @pytest.mark.skipif(sys.version_info < (3, 0), reason='Not valid for Python 2.7')
+    def test_magic_number_failure_if_interpreter_not_set(self):
+        cmd = bdist_wotmod(self.dist)
+        cmd.install_lib = 'res/scripts/common'
+        cmd.author_id = 'com.github.jhakonen'
+        cmd.ensure_finalized()
+        cmd.python27 = None
+        try:
+            cmd.run()
+            assert False, 'Expected test to fail'
+        except AssertionError as err:
+            assert 'is not valid Python 2.7 byte-compiled file' in str(err), err
 
 @pytest.mark.filterwarnings("ignore:bdist_wotmod")
 @pytest.mark.filterwarnings("ignore:Normalizing .+ to .+")
-class GetOutputFilePathTestCase(support.TempdirManager, unittest.TestCase):
+class GetOutputFilePathTestCase(TempdirManager, unittest.TestCase):
 
     def setUp(self):
         super(GetOutputFilePathTestCase, self).setUp()
@@ -137,10 +152,6 @@ def create_distribution(**kwargs):
     }, **kwargs))
     dist.script_name = 'setup.py'
     return dist
-
-def get_file_in_zip_contents(zip_path, arcname):
-    with zipfile.ZipFile(zip_path, 'r') as zip_file:
-        return zip_file.read(arcname)
 
 if __name__ == '__main__':
     unittest.main()

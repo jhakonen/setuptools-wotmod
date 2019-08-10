@@ -6,37 +6,36 @@ The code shows how to:
  - Load files from within wotmod package, and
  - React to game start up and shutdown
 
-## Prerequisites
-
-You will need Python 2.7 interpreter, do not use older (-2.6) or newer (3.0+)
-versions as the compiled Python byte code files (pyc) must be compatible with
-World of Tanks's own embedded Python interpreter which is also based on
-version 2.7.
-
 ## Installation
 
 Within the example's directory execute command:
 
-```powershell
+```bash
 python setup.py bdist_wotmod
 ```
 
 This will produce `johndoe.helloworld_01.00.wotmod` file to `dist` subdirectory.
-Copy the created wotmod file to `$ROOT\mods\$VERSION`, where:
- - $ROOT is WoT's root folder e.g. C:\Games\World_of_Tanks, and
- - $VERSION is game's current version
+Copy the file to `mods/<current version>` directory under game's directory.
 
 You may also install the wotmod to the game with one command by changing the
 default dist directory:
 
-```powershell
-    python setup.py bdist_wotmod --dist-dir=$ROOT\mods\$VERSION
+```bash
+    python setup.py bdist_wotmod --dist-dir='<game dir>/mods/<current version>'
 ```
 
-Now start following `python.log` to see what the mods prints. In Powershell:
+Now start following `python.log` to see what the mods prints.
+
+In Powershell:
 
 ```powershell
-    Get-Content $ROOT\python.log -Tail 3 -Wait
+    Get-Content <game dir>\python.log -Tail 3 -Wait
+```
+
+Or in bash:
+
+```bash
+    tail -f '<game dir>/python.log'
 ```
 
 Start the game, and after a while shut it down, and you should see HelloWorld
