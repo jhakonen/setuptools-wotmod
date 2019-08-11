@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='setuptools-wotmod',
-    version='0.1',
+    version='0.2',
     packages=find_packages(),
     description='setuptools integration for creating World of Tanks mods',
     long_description=open('README.md').read(),
